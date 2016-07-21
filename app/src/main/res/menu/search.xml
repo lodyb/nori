@@ -15,7 +15,7 @@
       android:title="@string/action_search"
       android:icon="@drawable/ic_action_search"
       nori:showAsAction="always|collapseActionView"
-      nori:actionViewClass="io.github.vomitcuddle.SearchViewAllowEmpty.SearchView"/>
+      nori:actionViewClass="android.support.v7.widget.SearchView"/>
 
   <item
       android:id="@+id/action_settings"

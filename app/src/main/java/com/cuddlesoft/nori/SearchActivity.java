@@ -18,6 +18,7 @@ import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -40,8 +41,6 @@ import com.cuddlesoft.norilib.clients.SearchClient;
 
 import java.io.IOException;
 import java.util.List;
-
-import io.github.vomitcuddle.SearchViewAllowEmpty.SearchView;
 
 /** Searches for images and displays the results in a scrollable grid of thumbnails. */
 public class SearchActivity extends ActionBarActivity implements SearchResultGridFragment.OnSearchResultGridFragmentInteractionListener {

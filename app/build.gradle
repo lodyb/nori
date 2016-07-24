@@ -6,7 +6,7 @@ android {
 
     defaultConfig {
         applicationId "com.cuddlesoft.nori"
-        minSdkVersion 10
+        minSdkVersion 16
         targetSdkVersion 24
         versionCode 2
         versionName "2.0.0-${gitRevision()}"
@@ -28,8 +28,8 @@ android {
 
 dependencies {
     // Support libraries.
-    compile 'com.android.support:appcompat-v7:24.0.0'
-    compile 'com.android.support:support-v4:24.0.0'
+    compile 'com.android.support:appcompat-v7:24.1.0'
+    compile 'com.android.support:support-v4:24.1.0'
 
     // Third-party libraries.
     // An HTTP+SPDY client for Android and Java applications. http://square.github.io/okhttp/
@@ -37,6 +37,8 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     // A powerful image downloading and caching library for Android http://square.github.io/picasso/
     compile 'com.squareup.picasso:picasso:2.3.4'
+    // ImageView with Pan & Zoom support for viewing images
+    compile 'it.sephiroth.android.library.imagezoom:imagezoom:2.2.5'
     // Utility library for easier unit testing.
     androidTestCompile 'org.easytesting:fest-assert-core:2.0M10'
 

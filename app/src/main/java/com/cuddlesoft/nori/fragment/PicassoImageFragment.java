@@ -6,22 +6,26 @@
 
 package com.cuddlesoft.nori.fragment;
 
+import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.cuddlesoft.nori.R;
 import com.cuddlesoft.norilib.Image;
-import com.ortiz.touch.TouchImageView;
 import com.squareup.picasso.Picasso;
 
+import it.sephiroth.android.library.imagezoom.ImageViewTouch;
+
 /**
- * Fragment using the {@link com.ortiz.touch.TouchImageView} widget
+ * Fragment using the {@link it.sephiroth.android.library.imagezoom.ImageViewTouch} widget
  * and the Picasso HTTP image loading library to display images.
  */
 public class PicassoImageFragment extends ImageFragment {
   /** Widget used to display the image. */
-  private TouchImageView imageView;
+  private ImageViewTouch imageView;
 
   /**
    * Factory method used to construct new fragments
@@ -47,13 +51,33 @@ public class PicassoImageFragment extends ImageFragment {
 
   @Override
   public boolean canScroll(int direction) {
-    return imageView == null || imageView.canScrollHorizontallyFroyo(direction);
+    if (imageView != null) {
+      boolean canScroll = imageView.canScroll(direction);
+
+      // Hack to fix a bug in ImageViewTouch when image.width < view.width.
+      if (canScroll) {
+        RectF bitmapRect = imageView.getBitmapRect();
+        Rect imageViewRect = new Rect();
+        imageView.getGlobalVisibleRect(imageViewRect);
+
+        if (bitmapRect != null) {
+          if (bitmapRect.width() < imageViewRect.width()) {
+            return false;
+          }
+        }
+      }
+
+      return canScroll;
+    }
+    return false;
   }
 
   @Override
   public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    View view = inflater.inflate(R.layout.fragment_picasso_image, container, false);
+
     // Initialize the ImageView widget.
-    imageView = new TouchImageView(getActivity());
+    imageView = (ImageViewTouch) view.findViewById(R.id.imageView);
 
     // Load image into the view.
     String imageUrl = shouldLoadImageSamples() ? image.sampleUrl : image.fileUrl;
@@ -61,6 +85,6 @@ public class PicassoImageFragment extends ImageFragment {
         .load(imageUrl)
         .into(imageView);
 
-    return imageView;
+    return view;
   }
 }

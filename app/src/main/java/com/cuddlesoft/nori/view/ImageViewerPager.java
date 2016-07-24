@@ -16,7 +16,7 @@ import com.cuddlesoft.nori.fragment.ImageFragment;
 
 /**
  * View pager used in {@link com.cuddlesoft.nori.ImageViewerActivity}. Gives touch event precedence to
- * multi-touch events sent to the {@link com.ortiz.touch.TouchImageView} in the contained fragment.
+ * multi-touch events sent to the {@link it.sephiroth.android.library.imagezoom.ImageViewTouch} in the contained fragment.
  */
 @SuppressWarnings("UnusedDeclaration")
 public class ImageViewerPager extends ViewPager {
@@ -59,17 +59,17 @@ public class ImageViewerPager extends ViewPager {
     // #instantiateItem() seems to be the "least awful" way to get the current item.
     ImageFragment imageFragment = (ImageFragment) getAdapter().instantiateItem(null, getCurrentItem());
     if (imageFragment != null) {
-      return imageFragment.canScroll(-dx);
+      return imageFragment.canScroll(dx);
     }
     return super.canScroll(v, checkV, dx, x, y);
   }
 
-  public static interface OnMotionEventListener {
+  public interface OnMotionEventListener {
     /**
      * Notifies the listener that a touch event has been intercepted.
      *
      * @param ev Motion event intercepted.
      */
-    public void onMotionEvent(MotionEvent ev);
+    void onMotionEvent(MotionEvent ev);
   }
 }

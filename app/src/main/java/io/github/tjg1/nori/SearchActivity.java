@@ -246,10 +246,11 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
     // Request window manager features.
     supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+    // Restore state from savedInstanceState.
+    super.onCreate(savedInstanceState);
 
     // Get shared preferences.
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -260,12 +261,25 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
     // Get search result grid fragment from fragment manager.
     searchResultGridFragment = (SearchResultGridFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_searchResultGrid);
 
-    // If the activity was started from a Search intent, create the SearchClient object and submit search.
-    Intent intent = getIntent();
-    if (intent != null && intent.getAction().equals(Intent.ACTION_SEARCH) && searchResultGridFragment.getSearchResult() == null) {
-      SearchClient.Settings searchClientSettings = intent.getParcelableExtra(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
-      searchClient = searchClientSettings.createSearchClient();
-      doSearch(intent.getStringExtra(BUNDLE_ID_SEARCH_QUERY));
+
+
+    SearchClient.Settings searchClientSettings = null;
+    // Try restoring the SearchClient from savedInstanceState
+    if (savedInstanceState != null) {
+      if (this.searchClient == null && savedInstanceState.containsKey(BUNDLE_ID_SEARCH_CLIENT_SETTINGS)) {
+        searchClientSettings = (SearchClient.Settings) savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
+        if (searchClientSettings != null) {
+          searchClient = searchClientSettings.createSearchClient();
+        }
+      }
+    } else {
+      Intent intent = getIntent();
+      // If the activity was started from a Search intent, create the SearchClient object and submit search.
+      if (intent != null && intent.getAction().equals(Intent.ACTION_SEARCH) && searchResultGridFragment.getSearchResult() == null) {
+        searchClientSettings = intent.getParcelableExtra(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
+        searchClient = searchClientSettings.createSearchClient();
+        doSearch(intent.getStringExtra(BUNDLE_ID_SEARCH_QUERY));
+      }
     }
 
     // Set up the dropdown API server picker.
@@ -297,6 +311,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
       outState.putCharSequence(BUNDLE_ID_SEARCH_QUERY, searchView.getQuery());
       outState.putBoolean(BUNDLE_ID_SEARCH_VIEW_IS_EXPANDED, MenuItemCompat.isActionViewExpanded(searchMenuItem));
       outState.putBoolean(BUNDLE_ID_SEARCH_VIEW_IS_FOCUSED, searchView.isFocused());
+      outState.putParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS, searchClient.getSettings());
     }
   }
 

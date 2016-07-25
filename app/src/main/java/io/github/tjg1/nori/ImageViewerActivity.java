@@ -73,6 +73,10 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
+    // Request window features.
+    supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
+
+    // Restore state from savedInstanceState.
     super.onCreate(savedInstanceState);
 
     // Get shared preferences.
@@ -95,8 +99,6 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
           .createSearchClient();
     }
 
-    // Request window features.
-    supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
     // Keep screen on, if enabled by the user.
     if (sharedPreferences.getBoolean(getString(R.string.preference_image_viewer_keepScreenOn_key), true)) {
       getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

@@ -9,7 +9,7 @@ If you're interested in contributing to Nori, have any questions or just want to
 
 ### Build ###
 
-To build Nori, first make sure you have cloned the repository recursively to get also get a copy of [norilib](https://github.com/tjg1/norilib), our API client library:
+To build Nori, first make sure you have cloned the repository recursively to also get a copy of [norilib](https://github.com/tjg1/norilib), our API client library:
 
 ```bash
 $ git clone --recursive https://github.com/tjg1/nori

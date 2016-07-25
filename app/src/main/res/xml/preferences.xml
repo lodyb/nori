@@ -14,8 +14,8 @@
         android:summary="@string/preference_service_settings_summary"
         android:title="@string/preference_service_settings_title">
       <intent
-          android:targetClass="com.cuddlesoft.nori.APISettingsActivity"
-          android:targetPackage="com.cuddlesoft.nori"/>
+          android:targetClass="io.github.tjg1.nori.APISettingsActivity"
+          android:targetPackage="io.github.tjg1.nori"/>
     </Preference>
   </PreferenceCategory>
 
@@ -48,15 +48,15 @@
         android:summary="@string/preference_nsfwFilter_summary"
         android:title="@string/preference_nsfwFilter_title">
       <intent
-          android:targetClass="com.cuddlesoft.nori.NSFWFilterSettingsActivity"
-          android:targetPackage="com.cuddlesoft.nori"/>
+          android:targetClass="io.github.tjg1.nori.NSFWFilterSettingsActivity"
+          android:targetPackage="io.github.tjg1.nori"/>
     </Preference>
     <Preference
         android:summary="@string/preference_tagFilter_summary"
         android:title="@string/preference_tagFilter_title">
       <intent
-          android:targetClass="com.cuddlesoft.nori.TagFilterSettingsActivity"
-          android:targetPackage="com.cuddlesoft.nori"/>
+          android:targetClass="io.github.tjg1.nori.TagFilterSettingsActivity"
+          android:targetPackage="io.github.tjg1.nori"/>
     </Preference>
     <Preference
         android:key="preference_clearSearchHistory"

@@ -2,7 +2,7 @@
 <!--
   ~ This file is part of nori.
   ~ Copyright (c) 2014 Tomasz Jan Góralczyk <tomg@fastmail.uk>
-  ~ License: ISC
+  ~ License: GNU GPLv2
   -->
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

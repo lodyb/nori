@@ -1,4 +1,4 @@
-[![GitHub license](https://img.shields.io/badge/license-ISC-blue.svg)](https://raw.githubusercontent.com/tjg1/nori/master/LICENSE)
+[![GitHub license](https://img.shields.io/badge/license-GPLv2-blue.svg)](https://raw.githubusercontent.com/tjg1/nori/master/LICENSE)
 [![GitHub stars](https://img.shields.io/github/stars/tjg1/nori.svg)](https://github.com/tjg1/nori/stargazers)
 [![Codacy grade](https://img.shields.io/codacy/grade/116eaec4502d4a88acf6eeb60ad98577.svg?maxAge=2592000)](https://www.codacy.com/app/tjg1/nori)
 [![Twitter URL](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&maxAge=2592000)](https://twitter.com/Nori_Android)

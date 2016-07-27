@@ -7,13 +7,13 @@
 <resources>
 
   <!-- Base application theme. -->
-  <style name="AppTheme" parent="Theme.AppCompat.Light">
+  <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
     <!-- Customize your theme here. -->
   </style>
   <!-- Dark theme used by the image viewer activity. -->
-  <style name="ImageViewerTheme" parent="Theme.AppCompat">
-    <item name="windowActionBarOverlay">true</item>
-    <item name="actionBarStyle">@style/ImageViewerActionBar</item>
+  <style name="ImageViewerTheme" parent="Theme.AppCompat">@style/ImageViewerActionBar
+    <item name="android:windowActionBarOverlay">true</item>
+    <item name="android:actionBarStyle">@style/ImageViewerActionBar</item>
   </style>
 
   <style name="ImageViewerActionBar" parent="Widget.AppCompat.ActionBar">

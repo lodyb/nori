@@ -10,7 +10,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -30,7 +31,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class NSFWFilterSettingsActivity extends ActionBarActivity implements ListView.OnItemClickListener, CompoundButton.OnCheckedChangeListener {
+public class NSFWFilterSettingsActivity extends AppCompatActivity implements ListView.OnItemClickListener, CompoundButton.OnCheckedChangeListener {
   /** Default {@link android.content.SharedPreferences} object. */
   private SharedPreferences sharedPreferences;
   /** Human-readable labels for each obscenity rating. */
@@ -47,11 +48,16 @@ public class NSFWFilterSettingsActivity extends ActionBarActivity implements Lis
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_nsfwfilter_settings);
 
+    // Set Toolbar as the app bar.
+    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
     // Hide the action bar icon and use the activity title as the home button.
     ActionBar actionBar = getSupportActionBar();
-    actionBar.setDisplayShowHomeEnabled(false);
-    actionBar.setDisplayShowTitleEnabled(true);
-    actionBar.setDisplayHomeAsUpEnabled(true);
+    if (actionBar != null) {
+      actionBar.setDisplayShowHomeEnabled(false);
+      actionBar.setDisplayShowTitleEnabled(true);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+    }
 
     // Get shared preference object.
     sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
@@ -63,8 +69,9 @@ public class NSFWFilterSettingsActivity extends ActionBarActivity implements Lis
 
     // Get current value of the preference_nsfwFilter preference, or fallback to the default value.
     if (sharedPreferences.contains(getString(R.string.preference_nsfwFilter_key))) {
-      final String nsfwFilter = sharedPreferences.getString(getString(R.string.preference_nsfwFilter_key), null).trim();
+      String nsfwFilter = sharedPreferences.getString(getString(R.string.preference_nsfwFilter_key), null);
       if (!TextUtils.isEmpty(nsfwFilter)) {
+        nsfwFilter = nsfwFilter.trim();
         obscenityRatingsFiltered.addAll((Arrays.asList(nsfwFilter.split(" "))));
       }
     } else {

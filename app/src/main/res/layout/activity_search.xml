@@ -4,13 +4,44 @@
   ~ License: GNU GPLv2
   -->
 
-<fragment
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_height="match_parent"
+  android:layout_width="match_parent"
+  android:orientation="vertical"
+  >
+
+  <android.support.v7.widget.Toolbar
+    android:id="@+id/toolbar"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_weight="0">
+
+    <Spinner
+      android:id="@+id/spinner_service"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"/>
+
+    <ProgressBar
+      android:id="@+id/progressBar"
+      android:layout_width="wrap_content"
+      android:layout_height="match_parent"
+      android:layout_gravity="right"
+      android:visibility="gone"/>
+
+  </android.support.v7.widget.Toolbar>
+
+  <fragment
     android:id="@+id/fragment_searchResultGrid"
     android:name="io.github.tjg1.nori.fragment.SearchResultGridFragment"
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_weight="1"
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
-    tools:context="io.github.tjg1.nori.SearchActivity"/>
+    tools:context="io.github.tjg1.nori.SearchActivity"
+    tools:layout="@layout/fragment_search_result_grid"/>
+
+</LinearLayout>
+

@@ -9,7 +9,6 @@ package io.github.tjg1.nori;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
@@ -17,28 +16,29 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.GestureDetector;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
-import io.github.tjg1.nori.fragment.ImageFragment;
-import io.github.tjg1.nori.fragment.PicassoImageFragment;
-import io.github.tjg1.nori.fragment.WebViewImageFragment;
-import io.github.tjg1.nori.view.ImageViewerPager;
+import java.io.IOException;
+
 import io.github.tjg1.library.norilib.Image;
 import io.github.tjg1.library.norilib.SearchResult;
 import io.github.tjg1.library.norilib.Tag;
 import io.github.tjg1.library.norilib.clients.SearchClient;
-
-import java.io.IOException;
+import io.github.tjg1.nori.fragment.ImageFragment;
+import io.github.tjg1.nori.fragment.PicassoImageFragment;
+import io.github.tjg1.nori.fragment.WebViewImageFragment;
+import io.github.tjg1.nori.view.ImageViewerPager;
 
 /** Activity used to display full-screen images. */
-public class ImageViewerActivity extends ActionBarActivity implements ViewPager.OnPageChangeListener,
+public class ImageViewerActivity extends AppCompatActivity implements ViewPager.OnPageChangeListener,
     ImageFragment.ImageFragmentListener, ImageViewerPager.OnMotionEventListener {
   /** Identifier used to keep the displayed {@link io.github.tjg1.library.norilib.SearchResult} in {@link #onSaveInstanceState(android.os.Bundle)}. */
   private static final String BUNDLE_ID_SEARCH_RESULT = "io.github.tjg1.nori.SearchResult";
@@ -70,12 +70,11 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
   private SearchClient searchClient;
   /** Callback waiting to receive another page of {@link io.github.tjg1.library.norilib.Image}s for the current {@link io.github.tjg1.library.norilib.SearchResult}. */
   private SearchClient.SearchCallback searchCallback;
+  /** {@link android.widget.ProgressBar} used to indicated Search API activity. */
+  private ProgressBar searchProgressBar;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Request window features.
-    supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
     // Restore state from savedInstanceState.
     super.onCreate(savedInstanceState);
 
@@ -89,8 +88,11 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
         savedInstanceState.containsKey(BUNDLE_ID_SEARCH_RESULT)) {
       imageIndex = savedInstanceState.getInt(BUNDLE_ID_IMAGE_INDEX);
       searchResult = savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_RESULT);
-      searchClient = ((SearchClient.Settings) savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS))
-          .createSearchClient();
+      SearchClient.Settings searchClientSettings = savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
+      if (searchClientSettings != null) {
+        searchClient = searchClientSettings.createSearchClient();
+      }
+
     } else {
       final Intent intent = getIntent();
       imageIndex = intent.getIntExtra(SearchActivity.BUNDLE_ID_IMAGE_INDEX, 0);
@@ -108,16 +110,21 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
     setContentView(R.layout.activity_image_viewer);
 
     // Set up the action bar.
+    final Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    searchProgressBar = (ProgressBar) toolbar.findViewById(R.id.progressBar);
+    setSupportActionBar(toolbar);
     final ActionBar actionBar = getSupportActionBar();
-    actionBar.hide();
-    actionBar.setDisplayShowHomeEnabled(false);
-    actionBar.setDisplayHomeAsUpEnabled(true);
+    if (actionBar != null) {
+      actionBar.setDisplayShowHomeEnabled(false);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+
+    }
 
     // Create and set the image viewer Fragment pager adapter.
     imagePagerAdapter = new ImagePagerAdapter(getSupportFragmentManager());
     viewPager = (ImageViewerPager) findViewById(R.id.image_pager);
     viewPager.setAdapter(imagePagerAdapter);
-    viewPager.setOnPageChangeListener(this);
+    viewPager.addOnPageChangeListener(this);
     viewPager.setCurrentItem(imageIndex);
 
     // Set up the GestureDetector used to toggle the action bar.
@@ -126,11 +133,6 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
 
     // Set activity title.
     setTitle(searchResult.getImages()[imageIndex]);
-
-    // Dim system UI.
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-      viewPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-    }
   }
 
   @Override
@@ -159,7 +161,10 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
       title = title.substring(0, getResources().getInteger(R.integer.activity_image_viewer_titleMaxLength)) + "…";
     }
 
-    getSupportActionBar().setTitle(title);
+    ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+      getSupportActionBar().setTitle(title);
+    }
   }
 
   /**
@@ -171,7 +176,7 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
       return;
     }
     // Show the indeterminate progress bar in the action bar.
-    setSupportProgressBarIndeterminateVisibility(true);
+    searchProgressBar.setVisibility(View.VISIBLE);
     // Request search result from API client.
     searchCallback = new InfiniteScrollingSearchCallback(searchResult);
     searchClient.search(Tag.stringFromArray(searchResult.getQuery()), searchResult.getCurrentOffset() + 1, searchCallback);
@@ -215,14 +220,12 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
   public void toggleActionBar() {
     // Toggle the action bar and UI dim.
     ActionBar actionBar = getSupportActionBar();
-    if (actionBar.isShowing()) {
-      actionBar.hide();
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+    if (actionBar != null) {
+      if (actionBar.isShowing()) {
+        actionBar.hide();
         viewPager.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE);
-      }
-    } else {
-      actionBar.show();
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+      } else {
+        actionBar.show();
         viewPager.setSystemUiVisibility(0);
       }
     }
@@ -294,7 +297,7 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
     public void onFailure(IOException e) {
       // Clear the active search callback and hide the progress bar in the action bar.
       searchCallback = null;
-      setSupportProgressBarIndeterminateVisibility(false);
+      searchProgressBar.setVisibility(View.GONE);
 
       // Display error toast notification to the user.
       Toast.makeText(ImageViewerActivity.this,
@@ -307,7 +310,7 @@ public class ImageViewerActivity extends ActionBarActivity implements ViewPager.
     public void onSuccess(SearchResult searchResult) {
       // Clear the active search callback and hide the progress bar in the action bar.
       searchCallback = null;
-      setSupportProgressBarIndeterminateVisibility(false);
+      searchProgressBar.setVisibility(View.GONE);
 
       if (searchResult.getImages().length == 0) {
         // Just mark the current SearchResult as having reached the last page.

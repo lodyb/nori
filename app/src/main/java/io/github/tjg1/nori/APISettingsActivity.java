@@ -15,7 +15,8 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -29,15 +30,15 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import io.github.tjg1.nori.database.APISettingsDatabase;
-import io.github.tjg1.nori.fragment.EditAPISettingDialogFragment;
-import io.github.tjg1.library.norilib.clients.SearchClient;
-import io.github.tjg1.library.norilib.service.ServiceTypeDetectionService;
-
 import java.util.List;
 
+import io.github.tjg1.library.norilib.clients.SearchClient;
+import io.github.tjg1.library.norilib.service.ServiceTypeDetectionService;
+import io.github.tjg1.nori.database.APISettingsDatabase;
+import io.github.tjg1.nori.fragment.EditAPISettingDialogFragment;
+
 /** Adds, edits or removes API settings from {@link io.github.tjg1.nori.database.APISettingsDatabase}. */
-public class APISettingsActivity extends ActionBarActivity implements EditAPISettingDialogFragment.Listener {
+public class APISettingsActivity extends AppCompatActivity implements EditAPISettingDialogFragment.Listener {
   /** A new row will be inserted into the database when this row ID value is passed to {@link #editService(long, String, String, String, String)}. */
   private static final long ROW_ID_INSERT = -1L;
 
@@ -47,11 +48,16 @@ public class APISettingsActivity extends ActionBarActivity implements EditAPISet
     // Inflate layout XML.
     setContentView(R.layout.activity_service_settings);
 
+    // Set up Toolbar.
+    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
     // Hide the app icon and use the activity title as the home button.
     ActionBar actionBar = getSupportActionBar();
-    actionBar.setDisplayShowHomeEnabled(false);
-    actionBar.setDisplayShowTitleEnabled(true);
-    actionBar.setDisplayHomeAsUpEnabled(true);
+    if (actionBar != null) {
+      actionBar.setDisplayShowHomeEnabled(false);
+      actionBar.setDisplayShowTitleEnabled(true);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+    }
 
     // Set up the ListView adapter and OnItemClickListener.
     ListView listView = (ListView) findViewById(android.R.id.list);

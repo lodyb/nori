@@ -17,8 +17,9 @@ import android.support.v4.content.Loader;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.CursorAdapter;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.SearchView;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -26,24 +27,26 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
+import android.widget.ProgressBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import io.github.tjg1.nori.database.APISettingsDatabase;
-import io.github.tjg1.nori.database.SearchSuggestionDatabase;
-import io.github.tjg1.nori.fragment.SearchResultGridFragment;
-import io.github.tjg1.library.norilib.Image;
-import io.github.tjg1.library.norilib.SearchResult;
-import io.github.tjg1.library.norilib.Tag;
-import io.github.tjg1.library.norilib.clients.SearchClient;
 
 import java.io.IOException;
 import java.util.List;
 
+import io.github.tjg1.library.norilib.Image;
+import io.github.tjg1.library.norilib.SearchResult;
+import io.github.tjg1.library.norilib.Tag;
+import io.github.tjg1.library.norilib.clients.SearchClient;
+import io.github.tjg1.nori.database.APISettingsDatabase;
+import io.github.tjg1.nori.database.SearchSuggestionDatabase;
+import io.github.tjg1.nori.fragment.SearchResultGridFragment;
+
 /** Searches for images and displays the results in a scrollable grid of thumbnails. */
-public class SearchActivity extends ActionBarActivity implements SearchResultGridFragment.OnSearchResultGridFragmentInteractionListener {
+public class SearchActivity extends AppCompatActivity implements SearchResultGridFragment.OnSearchResultGridFragmentInteractionListener {
   /** Identifier used to send the active {@link io.github.tjg1.library.norilib.SearchResult} to {@link io.github.tjg1.nori.ImageViewerActivity}. */
   public static final String BUNDLE_ID_SEARCH_RESULT = "io.github.tjg1.nori.SearchResult";
   /** Identifier used to send the position of the selected {@link io.github.tjg1.library.norilib.Image} to {@link io.github.tjg1.nori.ImageViewerActivity}. */
@@ -66,6 +69,10 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
   private SearchClient.Settings searchClientSettings;
   /** Search API client. */
   private SearchClient searchClient;
+  /** Search API activity indicator. */
+  private ProgressBar searchProgressBar;
+  /** Search API service dropdown. */
+  private Spinner serviceSpinner;
   /** Search view menu item. */
   private MenuItem searchMenuItem;
   /** Action bar search view. */
@@ -177,12 +184,21 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
 
   /** Set up the {@link android.support.v7.app.ActionBar}, including the API service picker dropdown. */
   private void setUpActionBar() {
+    Toolbar toolBar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolBar);
+    searchProgressBar = (ProgressBar) toolBar.findViewById(R.id.progressBar);
+
     ActionBar actionBar = getSupportActionBar();
+    if (actionBar != null) {
+      actionBar.setDisplayShowHomeEnabled(false);
+      actionBar.setDisplayShowTitleEnabled(false);
+    }
+
+   // Set up service list spinner.
+    serviceSpinner = (Spinner) toolBar.findViewById(R.id.spinner_service);
     ServiceDropdownAdapter serviceDropdownAdapter = new ServiceDropdownAdapter();
-    actionBar.setDisplayShowHomeEnabled(false);
-    actionBar.setDisplayShowTitleEnabled(false);
-    actionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_LIST);
-    actionBar.setListNavigationCallbacks(serviceDropdownAdapter, serviceDropdownAdapter);
+    serviceSpinner.setAdapter(serviceDropdownAdapter);
+    serviceSpinner.setOnItemSelectedListener(serviceDropdownAdapter);
   }
 
   /**
@@ -192,7 +208,9 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
    */
   private void doSearch(String query) {
     // Show progress bar in ActionBar.
-    setSupportProgressBarIndeterminateVisibility(true);
+    if (searchProgressBar != null) {
+      searchProgressBar.setVisibility(View.VISIBLE);
+    }
     // Request a search result from the API client.
     searchCallback = new SearchResultCallback();
     searchClient.search(query, searchCallback);
@@ -246,9 +264,6 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
-    // Request window manager features.
-    supportRequestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
-
     // Restore state from savedInstanceState.
     super.onCreate(savedInstanceState);
 
@@ -263,11 +278,11 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
 
 
 
-    SearchClient.Settings searchClientSettings = null;
+    SearchClient.Settings searchClientSettings;
     // Try restoring the SearchClient from savedInstanceState
     if (savedInstanceState != null) {
       if (this.searchClient == null && savedInstanceState.containsKey(BUNDLE_ID_SEARCH_CLIENT_SETTINGS)) {
-        searchClientSettings = (SearchClient.Settings) savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
+        searchClientSettings = savedInstanceState.getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
         if (searchClientSettings != null) {
           searchClient = searchClientSettings.createSearchClient();
         }
@@ -311,7 +326,9 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
       outState.putCharSequence(BUNDLE_ID_SEARCH_QUERY, searchView.getQuery());
       outState.putBoolean(BUNDLE_ID_SEARCH_VIEW_IS_EXPANDED, MenuItemCompat.isActionViewExpanded(searchMenuItem));
       outState.putBoolean(BUNDLE_ID_SEARCH_VIEW_IS_FOCUSED, searchView.isFocused());
-      outState.putParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS, searchClient.getSettings());
+      if (searchClient != null) {
+        outState.putParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS, searchClient.getSettings());
+      }
     }
   }
 
@@ -355,7 +372,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
       return;
     }
     // Show progress bar in ActionBar.
-    setSupportProgressBarIndeterminateVisibility(true);
+    searchProgressBar.setVisibility(View.VISIBLE);
     // Request search result from API client.
     searchCallback = new SearchResultCallback(searchResult);
     searchClient.search(Tag.stringFromArray(searchResult.getQuery()), searchResult.getCurrentOffset() + 1, searchCallback);
@@ -384,7 +401,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
         // Show error message to user.
         Toast.makeText(SearchActivity.this, String.format(getString(R.string.toast_networkError), e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
         // Clear callback and hide progress indicator in Action Bar.
-        setSupportProgressBarIndeterminateVisibility(false);
+        searchProgressBar.setVisibility(View.GONE);
         searchCallback = null;
       }
     }
@@ -393,7 +410,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
     public void onSuccess(SearchResult searchResult) {
       if (!isCancelled) {
         // Clear callback and hide progress indicator in Action Bar.
-        setSupportProgressBarIndeterminateVisibility(false);
+        searchProgressBar.setVisibility(View.GONE);
         searchCallback = null;
 
         // Filter the received SearchResult.
@@ -458,7 +475,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
   }
 
   /** Adapter populating the Search API picker in the ActionBar. */
-  private class ServiceDropdownAdapter extends BaseAdapter implements LoaderManager.LoaderCallbacks<List<Pair<Integer, SearchClient.Settings>>>, ActionBar.OnNavigationListener {
+  private class ServiceDropdownAdapter extends BaseAdapter implements LoaderManager.LoaderCallbacks<List<Pair<Integer, SearchClient.Settings>>>, AdapterView.OnItemSelectedListener {
     /** Search client settings loader ID. */
     private static final int LOADER_ID_API_SETTINGS = 0x00;
     /** Shared preference key used to store the last active {@link io.github.tjg1.library.norilib.clients.SearchClient}. */
@@ -544,7 +561,7 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
         notifyDataSetChanged();
         // Reselect last active item.
         if (!data.isEmpty()) {
-          getSupportActionBar().setSelectedNavigationItem(getPositionByItemId(lastSelectedItem));
+          serviceSpinner.setSelection(getPositionByItemId(lastSelectedItem));
         }
       }
     }
@@ -557,14 +574,17 @@ public class SearchActivity extends ActionBarActivity implements SearchResultGri
     }
 
     @Override
-    public boolean onNavigationItemSelected(int position, long id) {
+    public void onItemSelected(AdapterView<?> adapterView, View view, int position, long id) {
       // Save last active item to SharedPreferences.
       lastSelectedItem = id;
       sharedPreferences.edit().putLong(SHARED_PREFERENCE_LAST_SELECTED_INDEX, id).apply();
       // Notify parent activity.
       onSearchAPISelected(getItem(position));
+    }
 
-      return true;
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
   }
 }

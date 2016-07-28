@@ -59,8 +59,7 @@
         android:theme="@style/Theme.AppCompat.Light"/>
     <activity
         android:name=".APISettingsActivity"
-        android:label="@string/activity_service_settings"
-        android:theme="@style/Theme.AppCompat.Light"/>
+        android:label="@string/activity_service_settings"/>
 
     <provider
         android:name=".database.SearchSuggestionProvider"

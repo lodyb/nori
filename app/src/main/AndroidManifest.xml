@@ -50,8 +50,7 @@
         android:label="@string/activity_settings"/>
     <activity
         android:name=".NSFWFilterSettingsActivity"
-        android:label="@string/activity_nsfwfilter_settings"
-        android:theme="@style/Theme.AppCompat.Light">
+        android:label="@string/activity_nsfwfilter_settings">
     </activity>
     <activity
         android:name=".TagFilterSettingsActivity"

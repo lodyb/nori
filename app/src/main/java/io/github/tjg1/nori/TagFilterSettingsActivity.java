@@ -11,7 +11,8 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBar;
-import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -24,18 +25,18 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import io.github.tjg1.nori.fragment.AddTagFilterDialogFragment;
-import io.github.tjg1.nori.util.StringUtils;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import io.github.tjg1.nori.fragment.AddTagFilterDialogFragment;
+import io.github.tjg1.nori.util.StringUtils;
 
 /**
  * Manages the list of tags filtered out from {@link io.github.tjg1.library.norilib.SearchResult}s in {@link io.github.tjg1.nori.SearchActivity}
  * and {@link io.github.tjg1.nori.ImageViewerActivity}.
  */
-public class TagFilterSettingsActivity extends ActionBarActivity implements View.OnClickListener, AddTagFilterDialogFragment.AddTagListener {
+public class TagFilterSettingsActivity extends AppCompatActivity implements View.OnClickListener, AddTagFilterDialogFragment.AddTagListener {
   /** Default {@link android.content.SharedPreferences} object. */
   private SharedPreferences sharedPreferences;
   /** List of filtered tags currently stored in {@link #sharedPreferences}. */
@@ -94,11 +95,16 @@ public class TagFilterSettingsActivity extends ActionBarActivity implements View
       }
     }
 
+    // Set Toolbar as the Activity's app bar.
+    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+    setSupportActionBar(toolbar);
     // Hide the app icon and use the activity title as the home button.
     final ActionBar actionBar = getSupportActionBar();
-    actionBar.setDisplayShowHomeEnabled(false);
-    actionBar.setDisplayShowTitleEnabled(true);
-    actionBar.setDisplayHomeAsUpEnabled(true);
+    if (actionBar != null) {
+      actionBar.setDisplayShowHomeEnabled(false);
+      actionBar.setDisplayShowTitleEnabled(true);
+      actionBar.setDisplayHomeAsUpEnabled(true);
+    }
 
     // Set up the ListView adapter.
     final ListView listView = (ListView) findViewById(android.R.id.list);

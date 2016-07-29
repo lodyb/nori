@@ -86,7 +86,7 @@ public class APISettingsActivity extends AppCompatActivity implements EditAPISet
       public void run() {
         new APISettingsDatabase(APISettingsActivity.this).delete(id);
       }
-    }).run();
+    }).start();
   }
 
   @Override
@@ -144,7 +144,7 @@ public class APISettingsActivity extends AppCompatActivity implements EditAPISet
               }
               database.close();
             }
-          }).run();
+          }).start();
         } else if (resultCode == ServiceTypeDetectionService.RESULT_FAIL_INVALID_URL) {
           Toast.makeText(APISettingsActivity.this, R.string.toast_error_serviceUriInvalid, Toast.LENGTH_LONG).show();
         } else if (resultCode == ServiceTypeDetectionService.RESULT_FAIL_NETWORK) {

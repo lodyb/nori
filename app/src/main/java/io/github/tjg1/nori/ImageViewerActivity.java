@@ -117,7 +117,7 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
     if (actionBar != null) {
       actionBar.setDisplayShowHomeEnabled(false);
       actionBar.setDisplayHomeAsUpEnabled(true);
-
+      actionBar.hide();
     }
 
     // Create and set the image viewer Fragment pager adapter.
@@ -194,6 +194,7 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
 
   @Override
   public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+    // Do nothing.
   }
 
   @Override
@@ -210,6 +211,7 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
 
   @Override
   public void onPageScrollStateChanged(int state) {
+    // Do nothing.
   }
 
   @Override

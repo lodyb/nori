@@ -199,7 +199,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
 
   @Override
   public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
+    // Do nothing.
   }
 
   @Override
@@ -219,7 +219,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
 
   @Override
   public void afterTextChanged(Editable editable) {
-
+    // Do nothing.
   }
 
   @SuppressLint("SetTextI18n")

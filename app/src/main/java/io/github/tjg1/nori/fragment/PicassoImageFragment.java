@@ -60,10 +60,8 @@ public class PicassoImageFragment extends ImageFragment {
         Rect imageViewRect = new Rect();
         imageView.getGlobalVisibleRect(imageViewRect);
 
-        if (bitmapRect != null) {
-          if (bitmapRect.width() < imageViewRect.width()) {
-            return false;
-          }
+        if (bitmapRect != null && (bitmapRect.width() < imageViewRect.width())) {
+          return false;
         }
       }
 

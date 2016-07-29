@@ -204,6 +204,7 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
 
   @Override
   public void onScrollStateChanged(AbsListView view, int scrollState) {
+    // Do nothing.
   }
 
   @Override

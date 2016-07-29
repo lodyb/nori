@@ -463,7 +463,7 @@ public class SearchActivity extends AppCompatActivity implements SearchResultGri
           searchSuggestionDatabase.insert(query);
           searchSuggestionDatabase.close();
         }
-      }).run();
+      }).start();
     }
 
     /** Cancels this callback. */
@@ -582,7 +582,7 @@ public class SearchActivity extends AppCompatActivity implements SearchResultGri
 
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
-
+      // Do nothing.
     }
   }
 }

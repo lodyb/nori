@@ -22,6 +22,7 @@ import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Pair;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -103,16 +104,18 @@ public class SearchActivity extends AppCompatActivity implements SearchResultGri
     searchView.setFocusable(false);
     searchView.setQueryRefinementEnabled(true);
 
-    // Set SearchView event listeners.
-    searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+    // Set submit action and allow empty queries.
+    SearchView.SearchAutoComplete searchTextView = (SearchView.SearchAutoComplete) searchView.findViewById(R.id.search_src_text);
+    searchTextView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
       @Override
-      public boolean onQueryTextSubmit(String query) {
-        if (searchClientSettings != null) {
+      public boolean onEditorAction(TextView textView, int i, KeyEvent keyEvent) {
+        CharSequence query = textView.getText();
+        if (query != null && searchClientSettings != null) {
           // Prepare a intent to send to a new instance of this activity.
           Intent intent = new Intent(SearchActivity.this, SearchActivity.class);
           intent.setAction(Intent.ACTION_SEARCH);
           intent.putExtra(BUNDLE_ID_SEARCH_CLIENT_SETTINGS, searchClientSettings);
-          intent.putExtra(BUNDLE_ID_SEARCH_QUERY, query);
+          intent.putExtra(BUNDLE_ID_SEARCH_QUERY, query.toString());
 
           // Collapse the ActionView. This makes navigating through previous results using the back key less painful.
           MenuItemCompat.collapseActionView(searchMenuItem);
@@ -124,13 +127,8 @@ public class SearchActivity extends AppCompatActivity implements SearchResultGri
         // Returns true to override the default behaviour and stop another search Intent from being sent.
         return true;
       }
-
-      @Override
-      public boolean onQueryTextChange(String newText) {
-        // Returns false to perform the default action.
-        return false;
-      }
     });
+
     searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
       @Override
       public boolean onSuggestionSelect(int position) {

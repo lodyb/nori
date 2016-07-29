@@ -55,6 +55,7 @@
   <string name="toast_error_noNetwork">Couldn\'t connect to network.</string>
   <string name="toast_error_noServiceAtGivenUri">Couldn\'t find a supported API at the given URL.</string>
   <string name="toast_searchHistoryCleared">Search history cleared.</string>
+  <string name="toast_imageDownloadPermissionDenied">You need to grant storage permissions to download images.</string>
 
   <!-- Preferences -->
   <string name="preference_category_search">Search</string>

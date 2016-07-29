@@ -6,11 +6,17 @@
 
 package io.github.tjg1.nori;
 
+import android.Manifest;
+import android.app.DownloadManager;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
@@ -46,6 +52,10 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
   private static final String BUNDLE_ID_IMAGE_INDEX = "io.github.tjg1.nori.ImageIndex";
   /** Identifier used to keep {@link #searchClient} settings in {@link #onSaveInstanceState(android.os.Bundle)}. */
   private static final String BUNDLE_ID_SEARCH_CLIENT_SETTINGS = "io.github.tjg1.nori.SearchClient.Settings";
+  /** Identifier used to keep a queued {@link android.app.DownloadManager.Request} while we wait for user to grant permissions. */
+  private static final String BUNDLE_ID_QUEUED_DOWNLOAD_REQUEST = "io.github.tjg1.nori.QueuedDownloadImageRequest";
+  /** Identifier used to ask permission to download an image to the SD card. */
+  private static final int PERMISSION_REQUEST_DOWNLOAD_IMAGE = 0x00;
   /** Fetch more images when the displayed image is this far from the last {@link io.github.tjg1.library.norilib.Image} in the current {@link io.github.tjg1.library.norilib.SearchResult}. */
   private static final int INFINITE_SCROLLING_THRESHOLD = 3;
   /** Default shared preferences. */
@@ -72,6 +82,10 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
   private SearchClient.SearchCallback searchCallback;
   /** {@link android.widget.ProgressBar} used to indicated Search API activity. */
   private ProgressBar searchProgressBar;
+  /** {@link DownloadManager} used to download images. */
+  private DownloadManager downloadManager;
+  /** URL to an image to be downloaded once the user grants us permission to write to the SD card. */
+  private String queuedDownloadRequestUrl;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -92,7 +106,12 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
       if (searchClientSettings != null) {
         searchClient = searchClientSettings.createSearchClient();
       }
-
+      if (savedInstanceState.containsKey(BUNDLE_ID_QUEUED_DOWNLOAD_REQUEST)) {
+        String fileUrl = savedInstanceState.getString(BUNDLE_ID_QUEUED_DOWNLOAD_REQUEST);
+        if (fileUrl != null) {
+          queuedDownloadRequestUrl = savedInstanceState.getString(BUNDLE_ID_QUEUED_DOWNLOAD_REQUEST);
+        }
+      }
     } else {
       final Intent intent = getIntent();
       imageIndex = intent.getIntExtra(SearchActivity.BUNDLE_ID_IMAGE_INDEX, 0);
@@ -190,6 +209,9 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
     outState.putParcelable(BUNDLE_ID_SEARCH_RESULT, searchResult);
     outState.putInt(BUNDLE_ID_IMAGE_INDEX, viewPager.getCurrentItem());
     outState.putParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS, searchClient.getSettings());
+    if (queuedDownloadRequestUrl != null) {
+      outState.putString(BUNDLE_ID_QUEUED_DOWNLOAD_REQUEST, queuedDownloadRequestUrl);
+    }
   }
 
   @Override
@@ -236,6 +258,64 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
   @Override
   public SearchClient.Settings getSearchClientSettings() {
     return searchClient.getSettings();
+  }
+
+  @Override
+  public void downloadImage(@NonNull String fileUrl) {
+    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+      queuedDownloadRequestUrl = null;
+      getDownloadManager().enqueue(getImageDownloadRequest(fileUrl));
+    } else {
+      queuedDownloadRequestUrl = fileUrl;
+      ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, PERMISSION_REQUEST_DOWNLOAD_IMAGE);
+    }
+  }
+
+  @Override
+  public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    if (requestCode == PERMISSION_REQUEST_DOWNLOAD_IMAGE) {
+      if (grantResults[0] == PackageManager.PERMISSION_GRANTED && queuedDownloadRequestUrl != null) {
+        getDownloadManager().enqueue(getImageDownloadRequest(queuedDownloadRequestUrl));
+        queuedDownloadRequestUrl = null;
+      } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+        Toast.makeText(this, R.string.toast_imageDownloadPermissionDenied, Toast.LENGTH_LONG).show();
+      }
+    }
+  }
+
+  /**
+   * Create a new {@link DownloadManager} or re-use the existing one.
+   * @return {@link DownloadManager} used to download images.
+   */
+  @NonNull
+  private DownloadManager getDownloadManager() {
+    if (downloadManager == null) {
+      downloadManager = (DownloadManager) getSystemService(DOWNLOAD_SERVICE);
+    }
+    return downloadManager;
+  }
+
+  /** Create a {@link android.app.DownloadManager.Request} to download an image. */
+  @NonNull
+  private DownloadManager.Request getImageDownloadRequest(@NonNull String fileUrl) {
+    // Extract file name from URL.
+    String fileName = fileUrl.substring(fileUrl.lastIndexOf("/") + 1);
+    // Create download directory, if it does not already exist.
+    //noinspection ResultOfMethodCallIgnored
+    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+
+    // Create and queue download request.
+    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(fileUrl))
+        .setTitle(fileName)
+        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
+        .setVisibleInDownloadsUi(true);
+    // Trigger media scanner to add image to system gallery app on Honeycomb and above.
+    request.allowScanningByMediaScanner();
+    // Show download UI notification on Honeycomb and above.
+    request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+
+    return request;
   }
 
   /** Adapter used to populate {@link android.support.v4.view.ViewPager} with {@link io.github.tjg1.nori.fragment.ImageFragment}s. */

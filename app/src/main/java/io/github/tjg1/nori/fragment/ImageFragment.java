@@ -6,19 +6,24 @@
 
 package io.github.tjg1.nori.fragment;
 
+import android.Manifest;
 import android.app.DownloadManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.widget.ShareActionProvider;
 import android.text.TextUtils;
@@ -50,6 +55,8 @@ public abstract class ImageFragment extends Fragment {
   protected Image image;
   /** Class used for communication with the class that contains this fragment. */
   protected ImageFragmentListener listener;
+  /** Queued Download request while we wait for the user to grant permission. */
+  private DownloadManager.Request queuedDownloadRequest;
 
   /**
    * Check if the {@link android.support.v4.view.ViewPager} containing this fragment can scroll horizontally.
@@ -168,27 +175,9 @@ public abstract class ImageFragment extends Fragment {
    * Use the system {@link android.app.DownloadManager} service to download the image.
    */
   protected void downloadImage() {
-    // Get download manager system service.
-    DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-
-    // Extract file name from URL.
-    String fileName = image.fileUrl.substring(image.fileUrl.lastIndexOf("/") + 1);
-    // Create download directory, if it does not already exist.
-    //noinspection ResultOfMethodCallIgnored
-    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
-
-    // Create and queue download request.
-    DownloadManager.Request request = new DownloadManager.Request(Uri.parse(image.fileUrl))
-        .setTitle(fileName)
-        .setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
-        .setVisibleInDownloadsUi(true);
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-      // Trigger media scanner to add image to system gallery app on Honeycomb and above.
-      request.allowScanningByMediaScanner();
-      // Show download UI notification on Honeycomb and above.
-      request.setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED);
+    if (listener != null) {
+      listener.downloadImage(image.fileUrl);
     }
-    downloadManager.enqueue(request);
   }
 
   /**
@@ -246,5 +235,8 @@ public abstract class ImageFragment extends Fragment {
      * Should return the {@link SearchClient.Settings} object with the same settings used to fetch the image displayed by this fragment.
      */
     public SearchClient.Settings getSearchClientSettings();
+
+    /** Downloads an image using {@link android.app.DownloadManager}, asking the user to grant storage write permission, if necessary. */
+    public void downloadImage(@NonNull String fireUrl);
   }
 }

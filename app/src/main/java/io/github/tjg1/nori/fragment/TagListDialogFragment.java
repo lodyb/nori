@@ -11,7 +11,9 @@ import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +22,11 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
-import io.github.tjg1.nori.R;
-import io.github.tjg1.nori.SearchActivity;
 import io.github.tjg1.library.norilib.Image;
 import io.github.tjg1.library.norilib.Tag;
 import io.github.tjg1.library.norilib.clients.SearchClient;
+import io.github.tjg1.nori.R;
+import io.github.tjg1.nori.SearchActivity;
 
 /** Dialog showing a list of tags for given image in {@link io.github.tjg1.nori.ImageViewerActivity}. */
 public class TagListDialogFragment extends DialogFragment implements ListView.OnItemClickListener {
@@ -60,6 +62,7 @@ public class TagListDialogFragment extends DialogFragment implements ListView.On
     return fragment;
   }
 
+  @NonNull
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     // Extract data from the arguments bundle.
@@ -67,11 +70,11 @@ public class TagListDialogFragment extends DialogFragment implements ListView.On
     settings = getArguments().getParcelable(BUNDLE_ID_SEARCH_CLIENT_SETTINGS);
 
     // Create and initialize the ListView.
-    final ListView listView = new ListView(getActivity());
+    final ListView listView = new ListView(getContext());
     listView.setOnItemClickListener(this);
     listView.setAdapter(new TagListAdapter());
 
-    return new AlertDialog.Builder(getActivity())
+    return new AlertDialog.Builder(getContext())
         .setView(listView)
         .setPositiveButton(R.string.dialog_tags_closeButton, new DialogInterface.OnClickListener() {
           @Override
@@ -85,7 +88,7 @@ public class TagListDialogFragment extends DialogFragment implements ListView.On
   @Override
   public void onItemClick(AdapterView<?> adapterView, View clickedView, int position, long itemId) {
     // Start SearchActivity with search for the given tag.
-    final Intent intent = new Intent(getActivity(), SearchActivity.class);
+    final Intent intent = new Intent(getContext(), SearchActivity.class);
     intent.setAction(Intent.ACTION_SEARCH);
     intent.putExtra(SearchActivity.INTENT_EXTRA_SEARCH_CLIENT_SETTINGS, settings);
     intent.putExtra(SearchActivity.INTENT_EXTRA_SEARCH_QUERY, image.tags[position].getName());
@@ -134,7 +137,7 @@ public class TagListDialogFragment extends DialogFragment implements ListView.On
       // Set tag name.
       textView.setText(tag.getName());
       // Set appropriate colour for the tag type.
-      textView.setTextColor(getResources().getColor(tag.getColor()));
+      textView.setTextColor(ContextCompat.getColor(getContext(), tag.getColor()));
 
       return textView;
     }

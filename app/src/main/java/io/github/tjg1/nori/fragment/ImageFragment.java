@@ -6,7 +6,6 @@
 
 package io.github.tjg1.nori.fragment;
 
-import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -31,14 +30,14 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import io.github.tjg1.nori.R;
-import io.github.tjg1.nori.util.NetworkUtils;
-import io.github.tjg1.library.norilib.Image;
-import io.github.tjg1.library.norilib.clients.SearchClient;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+
+import io.github.tjg1.library.norilib.Image;
+import io.github.tjg1.library.norilib.clients.SearchClient;
+import io.github.tjg1.nori.R;
+import io.github.tjg1.nori.util.NetworkUtils;
 
 
 /** Fragment used to display images in {@link io.github.tjg1.nori.ImageViewerActivity}. */
@@ -73,12 +72,12 @@ public abstract class ImageFragment extends Fragment {
   }
 
   @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
+  public void onAttach(Context context) {
+    super.onAttach(context);
     try {
-      listener = (ImageFragmentListener) getActivity();
+      listener = (ImageFragmentListener) getContext();
     } catch (ClassCastException e) {
-      throw new ClassCastException(activity.toString()
+      throw new ClassCastException(context.toString()
           + " must implement OnFragmentInteractionListener");
     }
   }
@@ -138,10 +137,10 @@ public abstract class ImageFragment extends Fragment {
    * @return True if lower resolution images should be used.
    */
   protected boolean shouldLoadImageSamples() {
-    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
     return preferences.getBoolean(getString(R.string.preference_image_viewer_conserveBandwidth_key), false)
-        || NetworkUtils.shouldFetchImageSamples(getActivity());
+        || NetworkUtils.shouldFetchImageSamples(getContext());
   }
 
   /**
@@ -170,7 +169,7 @@ public abstract class ImageFragment extends Fragment {
    */
   protected void downloadImage() {
     // Get download manager system service.
-    DownloadManager downloadManager = (DownloadManager) getActivity().getSystemService(Context.DOWNLOAD_SERVICE);
+    DownloadManager downloadManager = (DownloadManager) getContext().getSystemService(Context.DOWNLOAD_SERVICE);
 
     // Extract file name from URL.
     String fileName = image.fileUrl.substring(image.fileUrl.lastIndexOf("/") + 1);
@@ -215,9 +214,9 @@ public abstract class ImageFragment extends Fragment {
    */
   protected void setAsWallpaper() {
     // Fetch and set full-screen image as wallpaper on background thread.
-    final Context context = getActivity();
+    final Context context = getContext();
     final String imageUrl = image.fileUrl;
-    final WallpaperManager wallpaperManager = WallpaperManager.getInstance(getActivity());
+    final WallpaperManager wallpaperManager = WallpaperManager.getInstance(getContext());
 
     new AsyncTask<Void, Void, Exception>() {
       @Override

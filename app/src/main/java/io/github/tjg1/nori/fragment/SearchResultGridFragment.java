@@ -6,7 +6,7 @@
 
 package io.github.tjg1.nori.fragment;
 
-import android.app.Activity;
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -21,11 +21,12 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
-import io.github.tjg1.nori.R;
-import io.github.tjg1.nori.widget.SquareImageView;
+import com.squareup.picasso.Picasso;
+
 import io.github.tjg1.library.norilib.Image;
 import io.github.tjg1.library.norilib.SearchResult;
-import com.squareup.picasso.Picasso;
+import io.github.tjg1.nori.R;
+import io.github.tjg1.nori.widget.SquareImageView;
 
 /** Shows images from a {@link SearchResult} as a scrollable grid of thumbnails. */
 public class SearchResultGridFragment extends Fragment implements AdapterView.OnItemClickListener, AbsListView.OnScrollListener {
@@ -68,7 +69,7 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
 
       // Create a new image, if not recycled.
       if (imageView == null) {
-        imageView = new SquareImageView(getActivity());
+        imageView = new SquareImageView(getContext());
         imageView.setLayoutParams(new GridView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
       }
 
@@ -82,7 +83,7 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
       }
 
       // Load image into view.
-      Picasso.with(getActivity())
+      Picasso.with(getContext())
           .load(image.previewUrl)
           .resize(previewSize, previewSize)
           .centerCrop()
@@ -147,7 +148,7 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
    */
   private int getGridViewColumnWidth() {
     // Get preference value from SharedPreference.
-    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
     String previewSize = sharedPreferences.getString(getString(R.string.preference_previewSize_key),
         getString(R.string.preference_previewSize_default));
 
@@ -166,14 +167,14 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
   }
 
   @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
+  public void onAttach(Context context) {
+    super.onAttach(context);
 
-    // Get a reference to parent activity, making sure that it implements the proper callback interface.
+    // Get a reference to parent Context, making sure that it implements the proper callback interface.
     try {
-      mListener = (OnSearchResultGridFragmentInteractionListener) activity;
+      mListener = (OnSearchResultGridFragmentInteractionListener) getContext();
     } catch (ClassCastException e) {
-      throw new ClassCastException(activity.toString()
+      throw new ClassCastException(getContext().toString()
           + " must implement OnFragmentInteractionListener");
     }
   }
@@ -196,7 +197,7 @@ public class SearchResultGridFragment extends Fragment implements AdapterView.On
   @Override
   public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
     if (mListener != null) {
-      // Notify parent activity that image has been clicked.
+      // Notify parent Context that image has been clicked.
       mListener.onImageSelected((Image) gridAdapter.getItem(position), position);
     }
   }

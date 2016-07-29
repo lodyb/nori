@@ -13,6 +13,7 @@ import android.content.UriMatcher;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 
 import static io.github.tjg1.nori.database.SearchSuggestionDatabase.COLUMN_ICON;
 import static io.github.tjg1.nori.database.SearchSuggestionDatabase.COLUMN_ID;
@@ -72,7 +73,7 @@ public class SearchSuggestionProvider extends ContentProvider {
   }
 
   @Override
-  public Cursor query(Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+  public Cursor query(@NonNull Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
     // Match the content URI to decide which type of query to run.
     switch (sURIMatcher.match(uri)) {
       case SEARCH_SUGGEST:
@@ -91,7 +92,7 @@ public class SearchSuggestionProvider extends ContentProvider {
   }
 
   @Override
-  public String getType(Uri uri) {
+  public String getType(@NonNull Uri uri) {
     // Match URI and return the appropriate mime type.
     switch (sURIMatcher.match(uri)) {
       case SEARCH_SUGGEST:
@@ -104,19 +105,19 @@ public class SearchSuggestionProvider extends ContentProvider {
   }
 
   @Override
-  public Uri insert(Uri uri, ContentValues contentValues) {
+  public Uri insert(@NonNull Uri uri, ContentValues contentValues) {
     // Use SearchSuggestionDatabase methods instead.
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public int delete(Uri uri, String s, String[] strings) {
+  public int delete(@NonNull Uri uri, String s, String[] strings) {
     // Use SearchSuggestionDatabase methods instead.
     throw new UnsupportedOperationException();
   }
 
   @Override
-  public int update(Uri uri, ContentValues contentValues, String s, String[] strings) {
+  public int update(@NonNull Uri uri, ContentValues contentValues, String s, String[] strings) {
     // Use SearchSuggestionDatabase methods instead.
     throw new UnsupportedOperationException();
   }

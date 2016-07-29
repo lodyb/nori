@@ -7,11 +7,12 @@
 package io.github.tjg1.nori.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -28,7 +29,7 @@ public class AddTagFilterDialogFragment extends DialogFragment implements View.O
   protected static final String BUNDLE_ID_TAG_FILTER = "io.github.tjg1.nori.TagFilter";
   /** Text box with tag to add to the tag filter list. */
   private EditText tagEditText;
-  /** Activity or Fragment listening for the result from this dialog. */
+  /** Context listening for the result from this dialog. */
   private AddTagListener listener;
 
 
@@ -37,12 +38,12 @@ public class AddTagFilterDialogFragment extends DialogFragment implements View.O
   }
 
   @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
+  public void onAttach(Context context) {
+    super.onAttach(context);
     try {
-      listener = (AddTagListener) getActivity();
+      listener = (AddTagListener) getContext();
     } catch (ClassCastException e) {
-      throw new ClassCastException(activity.toString()
+      throw new ClassCastException(getContext().toString()
           + "must implement OnFragmentInteractionListener");
     }
   }
@@ -62,11 +63,12 @@ public class AddTagFilterDialogFragment extends DialogFragment implements View.O
     }
   }
 
+  @NonNull
   @SuppressLint("InflateParams")
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     // Inflate the Dialog view XML.
-    final LayoutInflater inflater = LayoutInflater.from(getActivity());
+    final LayoutInflater inflater = LayoutInflater.from(getContext());
     final View view = inflater.inflate(R.layout.dialog_add_tag_filter, null);
     tagEditText = (EditText) view.findViewById(R.id.editText);
 
@@ -76,7 +78,7 @@ public class AddTagFilterDialogFragment extends DialogFragment implements View.O
     }
 
     // Create the AlertDialog object.
-    final AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+    final AlertDialog alertDialog = new AlertDialog.Builder(getContext())
         .setView(view)
         .setPositiveButton(R.string.action_add, null)
         .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
@@ -113,7 +115,7 @@ public class AddTagFilterDialogFragment extends DialogFragment implements View.O
     }
   }
 
-  /** Listener interface to be implemented by the Activity or Fragment that receives the tag entered in this Dialog. */
+  /** Listener interface to be implemented by the Context that receives the tag entered in this Dialog. */
   public interface AddTagListener {
     /**
      * Called when the user submits a new Tag to be added to the list.

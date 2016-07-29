@@ -81,7 +81,7 @@ public class PicassoImageFragment extends ImageFragment {
 
     // Load image into the view.
     String imageUrl = shouldLoadImageSamples() ? image.sampleUrl : image.fileUrl;
-    Picasso.with(getActivity())
+    Picasso.with(getContext())
         .load(imageUrl)
         .into(imageView);
 

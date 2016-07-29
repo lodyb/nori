@@ -7,11 +7,12 @@
 package io.github.tjg1.nori.fragment;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.DialogFragment;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -22,8 +23,8 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 
-import io.github.tjg1.nori.R;
 import io.github.tjg1.library.norilib.clients.SearchClient;
+import io.github.tjg1.nori.R;
 
 /** Dialog fragment used to add new and edit existing {@link io.github.tjg1.nori.database.APISettingsDatabase} entries in {@link io.github.tjg1.nori.APISettingsActivity}. */
 public class EditAPISettingDialogFragment extends DialogFragment implements AdapterView.OnItemClickListener, View.OnClickListener, TextWatcher, View.OnFocusChangeListener {
@@ -33,7 +34,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
   private static final String BUNDLE_ID_ROW_ID = "io.github.tjg1.nori.SearchClient.Settings.rowId";
   /** Danbooru API URL. Used to only show the optional authentication fields for the Danbooru API. */
   private static final String DANBOORU_API_URL = "http://danbooru.donmai.us";
-  /** Interface in the parent activity waiting to receive data from the dialog. */
+  /** Interface in the parent Context waiting to receive data from the dialog. */
   private Listener listener;
   /** Database ID of the object being edited (if not creating a new settings object). */
   private long rowId = -1;
@@ -67,14 +68,14 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
   }
 
   @Override
-  public void onAttach(Activity activity) {
-    super.onAttach(activity);
+  public void onAttach(Context context) {
+    super.onAttach(context);
 
-    // Ensure the parent activity implements the proper listener interface.
+    // Ensure the parent Context implements the proper listener interface.
     try {
-      listener = (Listener) getActivity();
+      listener = (Listener) getContext();
     } catch (ClassCastException e) {
-      throw new ClassCastException(getActivity().toString()
+      throw new ClassCastException(getContext().toString()
           + " must implement EditAPISettingDialogFragment.Listener");
     }
 
@@ -87,6 +88,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
     listener = null;
   }
 
+  @NonNull
   @Override
   public Dialog onCreateDialog(Bundle savedInstanceState) {
     // Get database row ID of the object being edited (if any) from the arguments bundle.
@@ -95,7 +97,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
     }
 
     // Inflate XML for the dialog's main view.
-    LayoutInflater inflater = LayoutInflater.from(getActivity());
+    LayoutInflater inflater = LayoutInflater.from(getContext());
     @SuppressLint("InflateParams") View view = inflater.inflate(R.layout.dialog_edit_api_setting, null, false);
 
     // Get references to the parent view's subviews.
@@ -105,7 +107,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
     passphrase = (EditText) view.findViewById(R.id.passphrase);
 
     // Set service name autosuggestion adapter.
-    name.setAdapter(new ArrayAdapter<>(getActivity(), R.layout.simple_dropdown_item, getResources().getStringArray(R.array.service_suggestions_names)));
+    name.setAdapter(new ArrayAdapter<>(getContext(), R.layout.simple_dropdown_item, getResources().getStringArray(R.array.service_suggestions_names)));
     name.setThreshold(1);
     name.setOnItemClickListener(this);
 
@@ -120,17 +122,19 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
       SearchClient.Settings settings = getArguments().getParcelable(BUNDLE_ID_SETTINGS);
 
       // Populate subviews with content.
-      name.setText(settings.getName());
-      uri.setText(settings.getEndpoint());
-      username.setText(settings.getUsername());
-      passphrase.setText(settings.getPassword());
+      if (settings != null) {
+        name.setText(settings.getName());
+        uri.setText(settings.getEndpoint());
+        username.setText(settings.getUsername());
+        passphrase.setText(settings.getPassword());
+      }
     }
 
     // Dismiss dropdown when the view is first shown.
     name.dismissDropDown();
 
     // Create the AlertDialog object.
-    final AlertDialog alertDialog = new AlertDialog.Builder(getActivity())
+    final AlertDialog alertDialog = new AlertDialog.Builder(getContext())
         .setView(view)
         .setTitle(rowId == -1 ? R.string.dialog_title_addService : R.string.dialog_title_editService)
         .setPositiveButton(R.string.ok, null)
@@ -174,13 +178,13 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
   // Called when the dialog's OK button is clicked.
   public void onClick(View view) {
     // Don't submit if any of the fields are empty. (Username and passphrase are always optional).
-    // Additional validation must be done by the parent activity when #addService is called.
+    // Additional validation must be done by the parent Context when #addService is called.
     if (name.getText().toString().isEmpty() || uri.getText().toString().isEmpty()
         || (username.getText().toString().isEmpty() != passphrase.getText().toString().isEmpty())) {
       return;
     }
 
-    // Send input to the parent activity, so that it can be added or edited in the database.
+    // Send input to the parent Context, so that it can be added or edited in the database.
     if (rowId < 0) {
       listener.addService(name.getText().toString(), uri.getText().toString(),
           username.getText().toString(), passphrase.getText().toString());
@@ -218,6 +222,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
 
   }
 
+  @SuppressLint("SetTextI18n")
   @Override
   public void onFocusChange(View v, boolean hasFocus) {
     // Prepend "http://" to the text field when it's focused by the user to inform them that
@@ -227,7 +232,7 @@ public class EditAPISettingDialogFragment extends DialogFragment implements Adap
     }
   }
 
-  /** Interface implemented by the parent activity to receive values from the dialog. */
+  /** Interface implemented by the parent Context to receive values from the dialog. */
   public static interface Listener {
     /**
      * Add a new service to the database.

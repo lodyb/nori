@@ -277,6 +277,7 @@ public class ImageViewerActivity extends AppCompatActivity implements ViewPager.
     if (requestCode == PERMISSION_REQUEST_DOWNLOAD_IMAGE) {
       if (grantResults[0] == PackageManager.PERMISSION_GRANTED && queuedDownloadRequestUrl != null) {
         getDownloadManager().enqueue(getImageDownloadRequest(queuedDownloadRequestUrl));
+        queuedDownloadRequestUrl = null;
       } else if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
         Toast.makeText(this, R.string.toast_imageDownloadPermissionDenied, Toast.LENGTH_LONG).show();
       }

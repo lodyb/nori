@@ -15,6 +15,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 
+import java.util.Locale;
+
 import static io.github.tjg1.nori.database.SearchSuggestionDatabase.COLUMN_ICON;
 import static io.github.tjg1.nori.database.SearchSuggestionDatabase.COLUMN_ID;
 import static io.github.tjg1.nori.database.SearchSuggestionDatabase.COLUMN_NAME;
@@ -79,7 +81,7 @@ public class SearchSuggestionProvider extends ContentProvider {
       case SEARCH_SUGGEST:
         String query = null;
         if (uri.getPathSegments().size() > 1) {
-          query = uri.getLastPathSegment().toLowerCase();
+          query = uri.getLastPathSegment().toLowerCase(Locale.US);
         }
         return getSuggestions(query);
       case SHORTCUT_REFRESH:

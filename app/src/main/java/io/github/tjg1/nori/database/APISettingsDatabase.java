@@ -216,7 +216,7 @@ public class APISettingsDatabase extends SQLiteOpenHelper {
   /** Loader class used to asynchronously offload database access to a background thread. */
   public static class Loader extends AsyncTaskLoader<List<Pair<Integer, SearchClient.Settings>>> {
     /** Database access helper. */
-    private final APISettingsDatabase db;
+    private APISettingsDatabase db;
     /** Cached result. */
     private List<Pair<Integer, SearchClient.Settings>> settingsList;
     /** {@link android.content.BroadcastReceiver} receiving database change notifications. */
@@ -234,13 +234,14 @@ public class APISettingsDatabase extends SQLiteOpenHelper {
      */
     public Loader(Context context) {
       super(context);
-      // Create database instance.
-      this.db = new APISettingsDatabase(context);
     }
 
     @Override
     protected void onStartLoading() {
       super.onStartLoading();
+
+      // Create database instance.
+      this.db = new APISettingsDatabase(getContext());
 
       // If there is a cached result available, deliver it immediately.
       if (settingsList != null) {
@@ -260,13 +261,19 @@ public class APISettingsDatabase extends SQLiteOpenHelper {
     @Override
     protected void onReset() {
       super.onReset();
+
+      // Release resources.
+      settingsList = null;
+      db.close();
+
       // Unregister broadcast receiver handling database change notifications.
       LocalBroadcastManager.getInstance(getContext()).unregisterReceiver(contentChangedBroadcastReceiver);
     }
 
     @Override
     public List<Pair<Integer, SearchClient.Settings>> loadInBackground() {
-      return db.getAll();
+      settingsList = db.getAll();
+      return settingsList;
     }
   }
 }

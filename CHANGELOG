@@ -1,0 +1,15 @@
+### Version 2.1.0 (29/06/2016) ###
+
+Tomasz Jan Góralczyk (31 commits):
+      Fix build with API 24
+      Change the minimum version Nori is compatible with to API 16 (Jelly Bean)
+      Replace TouchImageView with ImageViewZoom
+      Change package name to io.github.tjg1.nori
+      Fix crashes when restoring state of suspended activities
+      Update dependencies
+      Switch license to GNU GPLv2
+      Fix resource leak in APISettingsDatabase
+      Fix lint errors
+      Simplify code to accept empty queries in SearchActivity
+      Fix Codacy (static code analysis) issues
+      Ask for storage permission before downloading images on Android 6.0+
